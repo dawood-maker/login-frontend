@@ -1,144 +1,286 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 
-export default function Login() {
-  const navigate = useNavigate();
+const Login = () => {
   const { login } = useAuth();
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState("");
+  const [focusField, setFocusField] = useState("");
 
   const handleChange = (e) => {
-    setError('');
-    setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
-  const handleSubmit = async () => {
-    console.log('[Login] Attempting login with email:', form.email);
-    if (!form.email || !form.password) return setError('Please enter email and password.');
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setLoading(true);
+    setError("");
     try {
-      const res = await authAPI.login(form);
-      console.log('[Login] Login successful:', res.data.user);
-      login(res.data.token, res.data.user);
-      navigate('/dashboard');
+      const res = await loginUser(formData);
+      login(res.data.user, res.data.token);
+      navigate("/dashboard");
     } catch (err) {
-      const data = err.response?.data;
-      console.error('[Login] Login error:', data || err);
-      if (data?.needsVerification) {
-        navigate('/verify-otp', {
-          state: { email: form.email, purpose: 'register' }
-        });
-      } else {
-        setError(data?.message || 'Login failed. Please try again.');
-      }
+      setError(
+        err.response?.data?.message || "Login failed. Check credentials.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const inputStyle = (field) => ({
+    width: "100%",
+    padding: "0.85rem 1rem",
+    background: "#0d0d1f",
+    border: `1.5px solid ${focusField === field ? "#4f46e5" : "#2d2d4e"}`,
+    borderRadius: "10px",
+    color: "#f1f5f9",
+    fontSize: "0.95rem",
+    outline: "none",
+    transition: "all 0.25s ease",
+    fontFamily: "DM Sans, sans-serif",
+    boxShadow:
+      focusField === field ? "0 0 0 3px rgba(79, 70, 229, 0.15)" : "none",
+  });
+
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-gray-800 rounded-2xl shadow-2xl p-6 space-y-5 text-white">
-        {/* Icon */}
-        <div className="text-5xl text-purple-500 text-center animate-bounce">🔐</div>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+        background:
+          "radial-gradient(ellipse at 70% 50%, rgba(79,70,229,0.12) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(124,58,237,0.1) 0%, transparent 60%), #0f0f1a",
+      }}
+    >
+      <div
+        style={{
+          position: "fixed",
+          top: "20%",
+          right: "10%",
+          width: "350px",
+          height: "350px",
+          background:
+            "radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%)",
+          borderRadius: "50%",
+          pointerEvents: "none",
+          animation: "float 7s ease-in-out infinite",
+        }}
+      />
 
-        {/* Title */}
-        <h1 className="text-2xl font-bold text-center">Welcome Back</h1>
-        <p className="text-gray-400 text-center text-sm">Apne account mein login karo</p>
-
-        {/* Alerts */}
-        {error && <div className="bg-red-600 text-white px-3 py-2 rounded-md">{error}</div>}
-
-        {/* Email Input */}
-        <div className="flex flex-col space-y-1">
-          <label className="text-gray-300 font-medium">Email Address</label>
-          <input
-            type="email"
-            name="email"
-            placeholder="example@email.com"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full px-3 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-        </div>
-
-        {/* Password Input */}
-        <div className="flex flex-col space-y-1 relative">
-          <label className="text-gray-300 font-medium">Password</label>
-          <input
-            type={showPass ? 'text' : 'password'}
-            name="password"
-            placeholder="••••••••"
-            value={form.password}
-            onChange={handleChange}
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-            className="w-full px-3 py-2 pr-12 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPass(p => !p)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "440px",
+          background: "rgba(26, 26, 46, 0.9)",
+          backdropFilter: "blur(20px)",
+          borderRadius: "20px",
+          border: "1px solid #2d2d4e",
+          padding: "2.5rem",
+          boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
+          animation: "fadeIn 0.5s ease",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1rem",
+              fontSize: "1.6rem",
+              boxShadow: "0 10px 30px rgba(79,70,229,0.4)",
+            }}
           >
-            {showPass ? '🙈' : '👁️'}
-          </button>
+            🔐
+          </div>
+          <h1
+            style={{
+              fontFamily: "Syne, sans-serif",
+              fontWeight: 800,
+              fontSize: "1.7rem",
+              background: "linear-gradient(135deg, #f1f5f9, #818cf8)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              marginBottom: "0.4rem",
+            }}
+          >
+            Welcome Back
+          </h1>
+          <p style={{ color: "#64748b", fontSize: "0.9rem" }}>
+            Sign in to your account
+          </p>
         </div>
 
-        {/* Forgot Password Link */}
-        <div className="text-right text-sm text-purple-400 hover:underline">
-          <Link to="/forgot-password">Password bhool gaye?</Link>
-        </div>
+        {/* Error */}
+        {error && (
+          <div
+            style={{
+              background: "rgba(239,68,68,0.1)",
+              border: "1px solid rgba(239,68,68,0.3)",
+              borderRadius: "10px",
+              padding: "0.8rem 1rem",
+              marginBottom: "1.2rem",
+              color: "#fca5a5",
+              fontSize: "0.875rem",
+            }}
+          >
+            ⚠️ {error}
+          </div>
+        )}
 
-        {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="w-full flex justify-center items-center bg-purple-600 hover:bg-purple-700 transition px-4 py-2 rounded-md font-medium disabled:opacity-50"
-        >
-          {loading ? (
-            <>
-              <svg
-                className="animate-spin h-5 w-5 mr-2 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+        {/* Form */}
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "1.2rem" }}>
+            <label
+              style={{
+                display: "block",
+                color: "#94a3b8",
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              placeholder="john@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              onFocus={() => setFocusField("email")}
+              onBlur={() => setFocusField("")}
+              style={inputStyle("email")}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: "0.8rem" }}>
+            <label
+              style={{
+                display: "block",
+                color: "#94a3b8",
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Your password"
+              value={formData.password}
+              onChange={handleChange}
+              onFocus={() => setFocusField("password")}
+              onBlur={() => setFocusField("")}
+              style={inputStyle("password")}
+              required
+            />
+          </div>
+
+          {/* Forgot Password */}
+          <div style={{ textAlign: "right", marginBottom: "1.5rem" }}>
+            <Link
+              to="/forgot-password"
+              style={{
+                color: "#818cf8",
+                fontSize: "0.85rem",
+                textDecoration: "none",
+                fontWeight: 500,
+              }}
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "0.9rem",
+              background: loading
+                ? "#3730a3"
+                : "linear-gradient(135deg, #4f46e5, #7c3aed)",
+              border: "none",
+              borderRadius: "10px",
+              color: "white",
+              fontSize: "1rem",
+              fontWeight: 700,
+              cursor: loading ? "not-allowed" : "pointer",
+              fontFamily: "Syne, sans-serif",
+              transition: "all 0.25s ease",
+              opacity: loading ? 0.8 : 1,
+              boxShadow: loading ? "none" : "0 10px 30px rgba(79,70,229,0.4)",
+            }}
+          >
+            {loading ? (
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                }}
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
-              </svg>
-              Logging in...
-            </>
-          ) : (
-            'Login →'
-          )}
-        </button>
+                <div
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                    borderTop: "2px solid white",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  }}
+                />
+                Signing in...
+              </span>
+            ) : (
+              "🔓 Sign In"
+            )}
+          </button>
+        </form>
 
-        {/* Divider */}
-        <div className="flex items-center justify-center text-gray-400 my-2">ya</div>
-
-        {/* Register Link */}
-        <div className="text-center text-gray-400 text-sm">
-          Account nahi hai?{' '}
-          <Link className="text-purple-400 hover:underline" to="/register">
-            Register karo
+        <p
+          style={{
+            textAlign: "center",
+            marginTop: "1.5rem",
+            color: "#64748b",
+            fontSize: "0.9rem",
+          }}
+        >
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            style={{
+              color: "#818cf8",
+              textDecoration: "none",
+              fontWeight: 600,
+            }}
+          >
+            Sign up free →
           </Link>
-        </div>
+        </p>
       </div>
     </div>
   );
-}
+};
+
+export default Login;

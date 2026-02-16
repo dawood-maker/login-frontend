@@ -1,256 +1,233 @@
-import { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { authAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
-export default function Dashboard() {
+const Dashboard = () => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { user, logout, updateUser } = useAuth();
-  const [tab, setTab] = useState("profile"); // profile | changePass | changeEmail
 
-  // Change Password
-  const [passForm, setPassForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirm: "",
-  });
-  const [passError, setPassError] = useState("");
-  const [passSuccess, setPassSuccess] = useState("");
-  const [passLoading, setPassLoading] = useState(false);
-
-  // Change Email
-  const [emailForm, setEmailForm] = useState({ newEmail: "" });
-  const [emailError, setEmailError] = useState("");
-  const [emailSuccess, setEmailSuccess] = useState("");
-  const [emailLoading, setEmailLoading] = useState(false);
-
-  // ─── CHANGE PASSWORD ────────────────────────────────────────────────────────
-  const handleChangePassword = async () => {
-    console.log("[Dashboard] Attempting to change password...");
-    const { currentPassword, newPassword, confirm } = passForm;
-    if (!currentPassword || !newPassword || !confirm)
-      return setPassError("Please fill all fields.");
-    if (newPassword !== confirm)
-      return setPassError("New passwords do not match.");
-    if (newPassword.length < 6)
-      return setPassError("Password must be at least 6 characters.");
-
-    setPassLoading(true);
-    setPassError("");
-    setPassSuccess("");
-    try {
-      const res = await authAPI.changePassword({
-        currentPassword,
-        newPassword,
-      });
-      console.log("[Dashboard] Password changed:", res.data);
-      setPassSuccess(res.data.message);
-      setPassForm({ currentPassword: "", newPassword: "", confirm: "" });
-    } catch (err) {
-      console.error("[Dashboard] Password change error:", err);
-      setPassError(err.response?.data?.message || "Password change failed.");
-    } finally {
-      setPassLoading(false);
-    }
-  };
-
-  // ─── CHANGE EMAIL ───────────────────────────────────────────────────────────
-  const handleChangeEmail = async () => {
-    console.log("[Dashboard] Requesting email change to:", emailForm.newEmail);
-    if (!emailForm.newEmail) return setEmailError("Please enter new email.");
-    if (emailForm.newEmail === user?.email)
-      return setEmailError("Yeh aapka current email hai.");
-
-    setEmailLoading(true);
-    setEmailError("");
-    setEmailSuccess("");
-    try {
-      await authAPI.changeEmailReq({ newEmail: emailForm.newEmail });
-      console.log("[Dashboard] Email change OTP sent.");
-      navigate("/verify-otp", {
-        state: { email: emailForm.newEmail, purpose: "change_email" },
-      });
-    } catch (err) {
-      console.error("[Dashboard] Email change error:", err);
-      setEmailError(
-        err.response?.data?.message || "Email change request failed.",
-      );
-    } finally {
-      setEmailLoading(false);
-    }
-  };
-
-  // ─── LOGOUT ────────────────────────────────────────────────────────────────
-  const handleLogout = async () => {
-    console.log("[Dashboard] Logging out...");
-    await logout();
+  const handleLogout = () => {
+    logout();
     navigate("/login");
   };
 
+  const cards = [
+    { icon: "👤", label: "Full Name", value: user?.name },
+    { icon: "📧", label: "Email", value: user?.email },
+    { icon: "🛡️", label: "Account Status", value: "Active & Verified" },
+    {
+      icon: "📅",
+      label: "Member Since",
+      value: user?.createdAt
+        ? new Date(user.createdAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        : "Today",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-3xl bg-gray-800 rounded-xl shadow-2xl p-6 space-y-6 text-white">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">👋 Hello, {user?.name}!</h1>
-            <p className="text-gray-400 text-sm mt-1">
-              Aapka account dashboard
-            </p>
-          </div>
-          <button
-            className="bg-transparent border border-purple-600 hover:bg-purple-600 hover:text-white transition px-4 py-2 rounded-md font-medium"
-            onClick={handleLogout}
+    <div
+      style={{
+        minHeight: "100vh",
+        background:
+          "radial-gradient(ellipse at 30% 20%, rgba(79,70,229,0.1) 0%, transparent 60%), #0f0f1a",
+        padding: "3rem 2rem",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+          animation: "fadeIn 0.5s ease",
+        }}
+      >
+        {/* Hero Section */}
+        <div
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(79,70,229,0.25), rgba(124,58,237,0.2))",
+            border: "1px solid rgba(79,70,229,0.3)",
+            borderRadius: "20px",
+            padding: "2.5rem",
+            marginBottom: "2rem",
+            textAlign: "center",
+            position: "relative",
+            overflow: "hidden",
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          {/* Background grid */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              opacity: 0.05,
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+              backgroundSize: "30px 30px",
+            }}
+          />
+
+          <div
+            style={{
+              width: "80px",
+              height: "80px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.2rem",
+              fontSize: "2rem",
+              boxShadow: "0 15px 40px rgba(79,70,229,0.5)",
+              animation: "glow 3s ease-in-out infinite",
+            }}
           >
-            Logout 🚪
-          </button>
+            {user?.name?.charAt(0)?.toUpperCase() || "👤"}
+          </div>
+          <h1
+            style={{
+              fontFamily: "Syne, sans-serif",
+              fontWeight: 800,
+              fontSize: "2rem",
+              background: "linear-gradient(135deg, #f1f5f9, #818cf8)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              marginBottom: "0.4rem",
+            }}
+          >
+            Welcome, {user?.name?.split(" ")[0]}! 🎉
+          </h1>
+          <p style={{ color: "#94a3b8", fontSize: "0.95rem" }}>
+            You're successfully logged in to your dashboard
+          </p>
         </div>
 
-        {/* NAV TABS */}
-        <div className="flex space-x-4 border-b border-gray-700 pb-2">
-          {[
-            { key: "profile", label: "👤 Profile" },
-            { key: "changePass", label: "🔒 Password" },
-            { key: "changeEmail", label: "📧 Email" },
-          ].map((t) => (
-            <button
-              key={t.key}
-              className={`px-3 py-2 rounded-md font-medium transition ${
-                tab === t.key
-                  ? "bg-purple-600 text-white"
-                  : "text-gray-400 hover:text-white"
-              }`}
-              onClick={() => setTab(t.key)}
+        {/* Info Cards */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          {cards.map((card, i) => (
+            <div
+              key={i}
+              style={{
+                background: "rgba(26, 26, 46, 0.8)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid #2d2d4e",
+                borderRadius: "14px",
+                padding: "1.3rem",
+                transition: "all 0.25s ease",
+                cursor: "default",
+                animation: `fadeIn 0.5s ease ${i * 0.1}s both`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#4f46e5";
+                e.currentTarget.style.transform = "translateY(-3px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "#2d2d4e";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
             >
-              {t.label}
-            </button>
+              <div style={{ fontSize: "1.5rem", marginBottom: "0.6rem" }}>
+                {card.icon}
+              </div>
+              <p
+                style={{
+                  color: "#64748b",
+                  fontSize: "0.78rem",
+                  fontWeight: 500,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  marginBottom: "0.3rem",
+                }}
+              >
+                {card.label}
+              </p>
+              <p
+                style={{
+                  color: "#f1f5f9",
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                  wordBreak: "break-word",
+                }}
+              >
+                {card.value}
+              </p>
+            </div>
           ))}
         </div>
 
-        {/* ─── PROFILE TAB ─── */}
-        {tab === "profile" && (
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span>👤 Name</span>
-              <span className="font-semibold">{user?.name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>📧 Email</span>
-              <span className="font-semibold">{user?.email}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>✅ Status</span>
-              <span className="bg-green-600 text-white px-2 py-1 rounded-full text-xs">
-                Verified
-              </span>
-            </div>
-            <div className="flex justify-between border-b-0 items-center">
-              <span>🪪 User ID</span>
-              <span className="text-gray-400 text-xs font-mono">
-                {user?.id}
-              </span>
-            </div>
+        {/* Status Badge */}
+        <div
+          style={{
+            background: "rgba(34, 197, 94, 0.1)",
+            border: "1px solid rgba(34, 197, 94, 0.3)",
+            borderRadius: "14px",
+            padding: "1.2rem 1.5rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <div
+            style={{
+              width: "12px",
+              height: "12px",
+              borderRadius: "50%",
+              background: "#22c55e",
+              boxShadow: "0 0 10px rgba(34,197,94,0.6)",
+              flexShrink: 0,
+              animation: "pulse 2s ease-in-out infinite",
+            }}
+          />
+          <p style={{ color: "#86efac", fontSize: "0.9rem", fontWeight: 500 }}>
+            🔒 Your session is secure. Authentication token is active.
+          </p>
+        </div>
 
-            <button
-              className="mt-4 bg-red-600 hover:bg-red-700 transition px-4 py-2 rounded-md font-medium"
-              onClick={handleLogout}
-            >
-              🚪 Sign Out
-            </button>
-          </div>
-        )}
-
-        {/* ─── CHANGE PASSWORD TAB ─── */}
-        {tab === "changePass" && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">🔒 Password Badlo</h2>
-            {passError && (
-              <div className="bg-red-600 text-white px-3 py-2 rounded-md">
-                {passError}
-              </div>
-            )}
-            {passSuccess && (
-              <div className="bg-green-600 text-white px-3 py-2 rounded-md">
-                {passSuccess}
-              </div>
-            )}
-
-            <input
-              className="w-full px-3 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              type="password"
-              placeholder="Current Password"
-              value={passForm.currentPassword}
-              onChange={(e) =>
-                setPassForm((p) => ({ ...p, currentPassword: e.target.value }))
-              }
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                className="w-full px-3 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                type="password"
-                placeholder="New Password"
-                value={passForm.newPassword}
-                onChange={(e) =>
-                  setPassForm((p) => ({ ...p, newPassword: e.target.value }))
-                }
-              />
-              <input
-                className="w-full px-3 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                type="password"
-                placeholder="Confirm New"
-                value={passForm.confirm}
-                onChange={(e) =>
-                  setPassForm((p) => ({ ...p, confirm: e.target.value }))
-                }
-              />
-            </div>
-            <button
-              className="bg-purple-600 hover:bg-purple-700 transition px-4 py-2 rounded-md font-medium disabled:opacity-50"
-              onClick={handleChangePassword}
-              disabled={passLoading}
-            >
-              {passLoading ? "Changing..." : "Change Password ✓"}
-            </button>
-          </div>
-        )}
-
-        {/* ─── CHANGE EMAIL TAB ─── */}
-        {tab === "changeEmail" && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">📧 Email Badlo</h2>
-            <div className="bg-blue-600 text-white px-3 py-2 rounded-md">
-              ℹ️ Current email: <strong>{user?.email}</strong> <br />
-              OTP naye email par jayega verification ke liye.
-            </div>
-            {emailError && (
-              <div className="bg-red-600 text-white px-3 py-2 rounded-md">
-                {emailError}
-              </div>
-            )}
-            {emailSuccess && (
-              <div className="bg-green-600 text-white px-3 py-2 rounded-md">
-                {emailSuccess}
-              </div>
-            )}
-
-            <input
-              className="w-full px-3 py-2 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              type="email"
-              placeholder="New Email Address"
-              value={emailForm.newEmail}
-              onChange={(e) => setEmailForm({ newEmail: e.target.value })}
-              onKeyDown={(e) => e.key === "Enter" && handleChangeEmail()}
-            />
-            <button
-              className="bg-green-600 hover:bg-green-700 transition px-4 py-2 rounded-md font-medium disabled:opacity-50"
-              onClick={handleChangeEmail}
-              disabled={emailLoading}
-            >
-              {emailLoading ? "Sending OTP..." : "Send Verification OTP 📨"}
-            </button>
-          </div>
-        )}
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: "0.9rem",
+            background: "linear-gradient(135deg, #ef4444, #dc2626)",
+            border: "none",
+            borderRadius: "12px",
+            color: "white",
+            fontSize: "1rem",
+            fontWeight: 700,
+            cursor: "pointer",
+            fontFamily: "Syne, sans-serif",
+            letterSpacing: "0.3px",
+            boxShadow: "0 10px 30px rgba(239,68,68,0.3)",
+            transition: "all 0.25s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 15px 35px rgba(239,68,68,0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 10px 30px rgba(239,68,68,0.3)";
+          }}
+        >
+          🚪 Logout from Account
+        </button>
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;

@@ -1,198 +1,319 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { authAPI } from "../services/api";
-import registerImg from "../assets/register.png";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { registerUser } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 
-// 👇 Input Icons (Apni images yahan rakhna)
-import userIcon from "../assets/user.png";
-import emailIcon from "../assets/email.png";
-import lockIcon from "../assets/lock.png";
-import confirmIcon from "../assets/confirm.png";
-
-export default function Register() {
+const Register = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    confirm: "",
   });
-
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [focusField, setFocusField] = useState("");
 
   const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
     setError("");
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async () => {
-    const { name, email, password, confirm } = form;
-
-    if (!name || !email || !password || !confirm)
-      return setError("Please fill all fields.");
-    if (password !== confirm) return setError("Passwords do not match.");
-    if (password.length < 6)
-      return setError("Password must be at least 6 characters.");
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-
-      await authAPI.register({ name, email, password });
-
-      navigate("/verify-otp", {
-        state: { email, purpose: "register", name },
-      });
+      const res = await registerUser(formData);
+      login(res.data.user, res.data.token);
+      navigate("/dashboard");
     } catch (err) {
       setError(
-        err.response?.data?.message || "Registration failed. Please try again.",
+        err.response?.data?.message || "Registration failed. Try again.",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black p-4">
-      <div className="w-full max-w-md backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl shadow-2xl p-8 text-white space-y-6 transition-all duration-500">
-        {/* Top Image */}
+  const inputStyle = (field) => ({
+    width: "100%",
+    padding: "0.85rem 1rem",
+    background: "#0d0d1f",
+    border: `1.5px solid ${focusField === field ? "#4f46e5" : "#2d2d4e"}`,
+    borderRadius: "10px",
+    color: "#f1f5f9",
+    fontSize: "0.95rem",
+    outline: "none",
+    transition: "all 0.25s ease",
+    fontFamily: "DM Sans, sans-serif",
+    boxShadow:
+      focusField === field ? "0 0 0 3px rgba(79, 70, 229, 0.15)" : "none",
+  });
 
-        <img
-          className="w-20 h-20 sm:w-24 rounded-[30px] ml-[120px] sm:h-24 md:w-32 md:h-32 cursor-pointer object-contain"
-          src={registerImg}
-          alt="Register Illustration"
-        />
-        {/* Title */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-            Create Your Account
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+        background:
+          "radial-gradient(ellipse at 20% 50%, rgba(79,70,229,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(124,58,237,0.1) 0%, transparent 60%), #0f0f1a",
+      }}
+    >
+      {/* Decorative blobs */}
+      <div
+        style={{
+          position: "fixed",
+          top: "10%",
+          left: "5%",
+          width: "300px",
+          height: "300px",
+          background:
+            "radial-gradient(circle, rgba(79,70,229,0.15) 0%, transparent 70%)",
+          borderRadius: "50%",
+          pointerEvents: "none",
+          animation: "float 6s ease-in-out infinite",
+        }}
+      />
+      <div
+        style={{
+          position: "fixed",
+          bottom: "15%",
+          right: "8%",
+          width: "250px",
+          height: "250px",
+          background:
+            "radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)",
+          borderRadius: "50%",
+          pointerEvents: "none",
+          animation: "float 8s ease-in-out infinite reverse",
+        }}
+      />
+
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "440px",
+          background: "rgba(26, 26, 46, 0.9)",
+          backdropFilter: "blur(20px)",
+          borderRadius: "20px",
+          border: "1px solid #2d2d4e",
+          padding: "2.5rem",
+          boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
+          animation: "fadeIn 0.5s ease",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1rem",
+              fontSize: "1.6rem",
+              boxShadow: "0 10px 30px rgba(79,70,229,0.4)",
+            }}
+          >
+            🚀
+          </div>
+          <h1
+            style={{
+              fontFamily: "Syne, sans-serif",
+              fontWeight: 800,
+              fontSize: "1.7rem",
+              background: "linear-gradient(135deg, #f1f5f9, #818cf8)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              marginBottom: "0.4rem",
+            }}
+          >
+            Create Account
           </h1>
-          <p className="text-gray-400 text-sm mt-2">
-            Register karo aur journey start karo
+          <p style={{ color: "#64748b", fontSize: "0.9rem" }}>
+            Join us today, it's free!
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-400 px-4 py-2 rounded-xl text-sm">
-            {error}
+          <div
+            style={{
+              background: "rgba(239,68,68,0.1)",
+              border: "1px solid rgba(239,68,68,0.3)",
+              borderRadius: "10px",
+              padding: "0.8rem 1rem",
+              marginBottom: "1.2rem",
+              color: "#fca5a5",
+              fontSize: "0.875rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            ⚠️ {error}
           </div>
         )}
 
-        {/* Inputs */}
-        <div className="space-y-4">
-          <InputField
-            label="Full Name"
-            name="name"
-            type="text"
-            value={form.name}
-            placeholder="Enter your name"
-            handleChange={handleChange}
-            icon={userIcon}
-          />
+        {/* Form */}
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "1.2rem" }}>
+            <label
+              style={{
+                display: "block",
+                color: "#94a3b8",
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Full Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              placeholder="John Doe"
+              value={formData.name}
+              onChange={handleChange}
+              onFocus={() => setFocusField("name")}
+              onBlur={() => setFocusField("")}
+              style={inputStyle("name")}
+              required
+            />
+          </div>
 
-          <InputField
-            label="Email Address"
-            name="email"
-            type="email"
-            value={form.email}
-            placeholder="Enter your email"
-            handleChange={handleChange}
-            icon={emailIcon}
-          />
+          <div style={{ marginBottom: "1.2rem" }}>
+            <label
+              style={{
+                display: "block",
+                color: "#94a3b8",
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              placeholder="john@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              onFocus={() => setFocusField("email")}
+              onBlur={() => setFocusField("")}
+              style={inputStyle("email")}
+              required
+            />
+          </div>
 
-          <InputField
-            label="Password"
-            name="password"
-            type="password"
-            value={form.password}
-            placeholder="Minimum 6 characters"
-            handleChange={handleChange}
-            icon={lockIcon}
-          />
+          <div style={{ marginBottom: "1.8rem" }}>
+            <label
+              style={{
+                display: "block",
+                color: "#94a3b8",
+                fontSize: "0.85rem",
+                fontWeight: 500,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Min 6 characters"
+              value={formData.password}
+              onChange={handleChange}
+              onFocus={() => setFocusField("password")}
+              onBlur={() => setFocusField("")}
+              style={inputStyle("password")}
+              required
+            />
+          </div>
 
-          <InputField
-            label="Confirm Password"
-            name="confirm"
-            type="password"
-            value={form.confirm}
-            placeholder="Retype password"
-            handleChange={handleChange}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            icon={confirmIcon}
-          />
-        </div>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "0.9rem",
+              background: loading
+                ? "#3730a3"
+                : "linear-gradient(135deg, #4f46e5, #7c3aed)",
+              border: "none",
+              borderRadius: "10px",
+              color: "white",
+              fontSize: "1rem",
+              fontWeight: 700,
+              cursor: loading ? "not-allowed" : "pointer",
+              fontFamily: "Syne, sans-serif",
+              letterSpacing: "0.3px",
+              transition: "all 0.25s ease",
+              opacity: loading ? 0.8 : 1,
+              boxShadow: loading ? "none" : "0 10px 30px rgba(79,70,229,0.4)",
+            }}
+          >
+            {loading ? (
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                }}
+              >
+                <div
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                    borderTop: "2px solid white",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  }}
+                />
+                Creating Account...
+              </span>
+            ) : (
+              "✨ Create Account"
+            )}
+          </button>
+        </form>
 
-        {/* Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 disabled:opacity-50"
+        <p
+          style={{
+            textAlign: "center",
+            marginTop: "1.5rem",
+            color: "#64748b",
+            fontSize: "0.9rem",
+          }}
         >
-          {loading ? "Registering..." : "Register & Get OTP"}
-        </button>
-
-        {/* Login Link */}
-        <p className="text-center text-gray-400 text-sm">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-purple-400 hover:text-pink-400 transition"
+            style={{
+              color: "#818cf8",
+              textDecoration: "none",
+              fontWeight: 600,
+            }}
           >
-            Login here
+            Sign in →
           </Link>
         </p>
       </div>
     </div>
   );
-}
+};
 
-/* 🔥 Reusable Input Component With Icon */
-function InputField({
-  label,
-  name,
-  type,
-  value,
-  placeholder,
-  handleChange,
-  onKeyDown,
-  icon,
-}) {
-  return (
-    <div className="flex flex-col space-y-1">
-      <label className="text-gray-300 text-sm font-medium">{label}</label>
-
-      <div className="relative">
-        {/* Icon */}
-        <img
-          src={icon}
-          alt=""
-          className="w-5 h-5 sm:w-6 cursor-pointer object-contain mix-blend-multiply absolute left-3 top-1/2 -translate-y-1/2"
-        />
-
-        <input
-          type={type}
-          name={name}
-          value={value}
-          placeholder={placeholder}
-          onChange={handleChange}
-          onKeyDown={onKeyDown}
-          autoComplete="off"
-          className="
-            w-full
-            pl-10 pr-4 py-2 rounded-xl
-            bg-gray-800
-            text-white
-            placeholder-gray-500
-            border border-gray-700
-            focus:outline-none
-            focus:ring-2 focus:ring-purple-500
-            focus:border-purple-500
-            transition-all duration-300
-          "
-        />
-      </div>
-    </div>
-  );
-}
+export default Register;

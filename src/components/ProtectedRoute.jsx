@@ -1,29 +1,42 @@
+import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-// Loading Spinner Component
-function Loader() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="w-12 h-12 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
-    </div>
-  );
-}
-
-// Protected route — sirf logged in users ke liye
-export function ProtectedRoute({ children }) {
+const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <Loader />;
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+          flexDirection: "column",
+          gap: "1rem",
+        }}
+      >
+        <div
+          style={{
+            width: "40px",
+            height: "40px",
+            border: "3px solid #2d2d4e",
+            borderTop: "3px solid #4f46e5",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+          }}
+        />
+        <p style={{ color: "#94a3b8" }}>Loading...</p>
+      </div>
+    );
+  }
 
-  return user ? children : <Navigate to="/login" replace />;
-}
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
-// Public route — logged in users ko dashboard bhejo
-export function PublicRoute({ children }) {
-  const { user, loading } = useAuth();
+  return children;
+};
 
-  if (loading) return <Loader />;
-
-  return !user ? children : <Navigate to="/dashboard" replace />;
-}
+export default ProtectedRoute;

@@ -28,9 +28,11 @@ const ForgotPassword = () => {
     setSuccess("");
 
     try {
+      // ✅ FIX: forgotPassword already returns response.data
+      // isliye res.data nahi, seedha res use karo
       const res = await forgotPassword({ email });
-      console.log("OTP Sent Response:", res.data);
-      setSuccess(res.data.message);
+      console.log("OTP Sent Response:", res);
+      setSuccess(res.message); // ✅ res.message (res.data.message nahi)
       setStep(2);
     } catch (err) {
       console.log("Send OTP Error:", err.response?.data);
@@ -240,3 +242,4 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
+  

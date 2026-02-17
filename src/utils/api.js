@@ -4,7 +4,7 @@ console.log("🌍 Creating Axios API Instance...");
 
 const API = axios.create({
   baseURL: "http://localhost:5000/api",
-  withCredentials: true,
+  withCredentials: true, // <-- ensures credentials (cookies/auth) are sent
 });
 
 // ===============================
@@ -75,16 +75,33 @@ export const getProfile = () => {
   return API.get("/auth/profile");
 };
 
-export const forgotPassword = (data) => {
+// -------------------------------
+// 📧 Forgot Password / Send OTP
+// -------------------------------
+export const forgotPassword = async (data) => {
   console.log("📧 Calling Forgot Password API:", data);
-  return API.post("/auth/forgot-password", data);
+
+  try {
+    const response = await API.post("/auth/forgot-password", data);
+    console.log("OTP response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending OTP:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
+// -------------------------------
+// 🔢 Verify OTP
+// -------------------------------
 export const verifyOTP = (data) => {
   console.log("🔢 Calling Verify OTP API:", data);
   return API.post("/auth/verify-otp", data);
 };
 
+// -------------------------------
+// 🔁 Reset Password
+// -------------------------------
 export const resetPassword = (data) => {
   console.log("🔁 Calling Reset Password API:", data);
   return API.post("/auth/reset-password", data);

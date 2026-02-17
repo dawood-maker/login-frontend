@@ -15,3 +15,21 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+/* Global autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #333A52 inset; /* background same as input */
+    -webkit-text-fill-color: white; /* text color */
+    transition: background-color 5000s ease-in-out 0s; /* prevents flicker */
+}
+
+/* Input error autofill */
+input.error:-webkit-autofill,
+input.error:-webkit-autofill:hover,
+input.error:-webkit-autofill:focus,
+input.error:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #421010 inset; /* red background for error */
+    -webkit-text-fill-color: red; /* red text */
+}

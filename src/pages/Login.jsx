@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import singup from "../assets/singup.png";
+import email from "../assets/email.png";
+import lock from "../assets/lock.png";
 
 const Login = () => {
   const { login } = useAuth();
@@ -63,14 +66,13 @@ const Login = () => {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <div
-            className="w-14 h-14 mx-auto mb-4 flex items-center justify-center 
+          <img
+            src={singup}
+            alt="singup"
+            className="w-25 h-20 mx-auto mb-4 flex items-center justify-center 
             text-xl rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 
             shadow-lg shadow-indigo-600/40"
-          >
-            🔐
-          </div>
-
+          />
           <h1
             className="text-2xl font-extrabold bg-gradient-to-r 
             from-slate-100 to-indigo-400 bg-clip-text text-transparent"
@@ -93,28 +95,34 @@ const Login = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-slate-400 text-sm mb-2">
-              Email Address
-            </label>
+          <div className="mb-4 flex items-center gap-3 w-full px-5 py-3 rounded-full bg-[#333A52] shadow-md">
+            {/* Email icon */}
+            <img
+              src={email} // Make sure this import exists
+              alt="email icon"
+              className="w-5 h-5 sm:w-6 cursor-pointer object-contain mix-blend-multiply"
+            />
+
+            {/* Input with left padding for icon */}
             <input
               type="email"
               name="email"
-              placeholder="john@example.com"
+              placeholder="Enter your email address"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 rounded-lg bg-[#0d0d1f] 
-                border border-[#2d2d4e] text-slate-100
-                focus:border-indigo-600 focus:ring-2 
-                focus:ring-indigo-600/30 outline-none transition"
+              className="bg-transparent rounded-[5px] bg-[#333A52] outline-none text-white w-full text-sm"
             />
           </div>
 
-          <div>
-            <label className="block text-slate-400 text-sm mb-2">
-              Password
-            </label>
+          <div className="mb-4 flex items-center gap-3 w-full px-5 py-3 rounded-full bg-[#333A52] shadow-md">
+            {/* Password icon */}
+            <img
+              src={lock} // Make sure this import exists
+              alt="email icon"
+              className="w-5 h-5 sm:w-6 cursor-pointer object-contain mix-blend-multiply"
+            />
+            {/* Input with left padding for icon */}
             <input
               type="password"
               name="password"
@@ -122,10 +130,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 rounded-lg bg-[#0d0d1f] 
-                border border-[#2d2d4e] text-slate-100
-                focus:border-indigo-600 focus:ring-2 
-                focus:ring-indigo-600/30 outline-none transition"
+              className="bg-transparent rounded-[5px] bg-[#333A52] outline-none text-white w-full text-sm"
             />
           </div>
 
@@ -143,11 +148,22 @@ const Login = () => {
             type="submit"
             disabled={loading}
             className="w-full py-3 rounded-lg font-bold text-white 
-              bg-gradient-to-r from-indigo-600 to-purple-600 
-              hover:opacity-90 transition disabled:opacity-70 
-              shadow-lg shadow-indigo-600/40"
+    bg-gradient-to-r from-indigo-600 to-purple-600 
+    hover:opacity-90 transition disabled:opacity-70 
+    shadow-lg shadow-indigo-600/40 flex items-center justify-center gap-2 "
           >
-            {loading ? "Signing in..." : "🔓 Sign In"}
+            {loading ? (
+              "Signing in..."
+            ) : (
+              <>
+                <img
+                  src={lock} // <-- yahan aap apni image ka path den
+                  alt="Lock Icon"
+                  className="w-5 h-5 cursor-pointer object-contain mix-blend-multiply" // size adjust karne ke liye
+                />
+                Sign In
+              </>
+            )}
           </button>
         </form>
 
@@ -157,7 +173,7 @@ const Login = () => {
             to="/register"
             className="text-indigo-400 font-semibold hover:text-indigo-300 transition"
           >
-            Sign up free →
+            Sign up →
           </Link>
         </p>
       </div>

@@ -5,64 +5,53 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // On app start / page refresh — check localStorage for token and fetch user
   useEffect(() => {
-    console.log("🔄 AuthProvider Mounted");
+    console.log("🔄 AuthProvider Mounted — checking saved session");
 
     const initAuth = async () => {
-      console.log("🔍 Checking saved token...");
-
       const savedToken = localStorage.getItem("token");
 
       if (savedToken) {
-        console.log("✅ Token Found in localStorage:", savedToken);
-
+        console.log("✅ Token found in localStorage");
         try {
           const res = await getProfile();
-          console.log("👤 Profile Fetched Successfully:", res.data.user);
-
+          console.log("👤 Profile fetched:", res.data.user);
           setUser(res.data.user);
           setToken(savedToken);
         } catch (err) {
-          console.log("❌ Profile Fetch Failed:", err.response?.data);
-
+          console.log("❌ Token invalid or expired — clearing session");
           localStorage.removeItem("token");
           setToken(null);
           setUser(null);
         }
       } else {
-        console.log("⚠️ No Token Found");
+        console.log("⚠️ No saved token found");
       }
 
       setLoading(false);
-      console.log("✅ Auth Initialization Complete");
     };
 
     initAuth();
   }, []);
 
   const login = (userData, authToken) => {
-    console.log("🔐 Login Function Called");
-    console.log("User Data:", userData);
-    console.log("Token:", authToken);
-
+    console.log("🔐 Login called — storing token");
     setUser(userData);
     setToken(authToken);
-    localStorage.setItem("token", authToken);
-
-    console.log("✅ User Logged In & Token Stored");
+    localStorage.setItem("token", authToken); // Persist across refreshes
+    console.log("✅ Logged in & token saved to localStorage");
   };
 
   const logout = () => {
-    console.log("🚪 Logout Function Called");
-
+    console.log("🚪 Logout called — clearing session");
     setUser(null);
     setToken(null);
-    localStorage.removeItem("token");
-
-    console.log("🗑️ Token Removed & User Cleared");
+    localStorage.removeItem("token"); // Clear on logout
+    console.log("🗑️ Token removed & user cleared");
   };
 
   return (
@@ -74,13 +63,9 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-
   if (!context) {
-    console.log("❌ useAuth used outside AuthProvider");
     throw new Error("useAuth must be used within AuthProvider");
   }
-
-  console.log("📡 useAuth Hook Accessed");
   return context;
 };
 

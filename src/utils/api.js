@@ -1,25 +1,93 @@
 import axios from "axios";
 
+console.log("🌍 Creating Axios API Instance...");
+
 const API = axios.create({
   baseURL: "http://localhost:5000/api",
   withCredentials: true,
 });
 
-// Add token to every request if available
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ===============================
+// 🔐 Request Interceptor
+// ===============================
+API.interceptors.request.use(
+  (config) => {
+    console.log("📤 API Request Sent:");
+    console.log("➡️ URL:", config.url);
+    console.log("➡️ Method:", config.method);
+    console.log("➡️ Data:", config.data);
 
-// Auth APIs
-export const registerUser = (data) => API.post("/auth/register", data);
-export const loginUser = (data) => API.post("/auth/login", data);
-export const getProfile = () => API.get("/auth/profile");
-export const forgotPassword = (data) => API.post("/auth/forgot-password", data);
-export const verifyOTP = (data) => API.post("/auth/verify-otp", data);
-export const resetPassword = (data) => API.post("/auth/reset-password", data);
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      console.log("🔐 Attaching Token to Request");
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.log("⚠️ No Token Found for Request");
+    }
+
+    return config;
+  },
+  (error) => {
+    console.log("❌ Request Error:", error);
+    return Promise.reject(error);
+  },
+);
+
+// ===============================
+// 📥 Response Interceptor
+// ===============================
+API.interceptors.response.use(
+  (response) => {
+    console.log("✅ API Response Received:");
+    console.log("⬅️ URL:", response.config.url);
+    console.log("⬅️ Status:", response.status);
+    console.log("⬅️ Data:", response.data);
+
+    return response;
+  },
+  (error) => {
+    console.log("❌ API Response Error:");
+    console.log("⬅️ URL:", error.config?.url);
+    console.log("⬅️ Status:", error.response?.status);
+    console.log("⬅️ Message:", error.response?.data);
+
+    return Promise.reject(error);
+  },
+);
+
+// ===============================
+// 🚀 Auth APIs
+// ===============================
+
+export const registerUser = (data) => {
+  console.log("📝 Calling Register API:", data);
+  return API.post("/auth/register", data);
+};
+
+export const loginUser = (data) => {
+  console.log("🔐 Calling Login API:", data);
+  return API.post("/auth/login", data);
+};
+
+export const getProfile = () => {
+  console.log("👤 Calling Get Profile API");
+  return API.get("/auth/profile");
+};
+
+export const forgotPassword = (data) => {
+  console.log("📧 Calling Forgot Password API:", data);
+  return API.post("/auth/forgot-password", data);
+};
+
+export const verifyOTP = (data) => {
+  console.log("🔢 Calling Verify OTP API:", data);
+  return API.post("/auth/verify-otp", data);
+};
+
+export const resetPassword = (data) => {
+  console.log("🔁 Calling Reset Password API:", data);
+  return API.post("/auth/reset-password", data);
+};
 
 export default API;

@@ -1,87 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
-const navStyle = {
-  background: "rgba(26, 26, 46, 0.95)",
-  backdropFilter: "blur(20px)",
-  borderBottom: "1px solid #2d2d4e",
-  padding: "0 2rem",
-  position: "sticky",
-  top: 0,
-  zIndex: 1000,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  height: "65px",
-};
-
-const logoStyle = {
-  fontFamily: "Syne, sans-serif",
-  fontWeight: 800,
-  fontSize: "1.4rem",
-  background: "linear-gradient(135deg, #818cf8, #4f46e5)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  textDecoration: "none",
-  letterSpacing: "-0.5px",
-};
-
-const navLinksStyle = {
-  display: "flex",
-  alignItems: "center",
-  gap: "1rem",
-};
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [hoverLogout, setHoverLogout] = useState(false);
 
+  useEffect(() => {
+    console.log("Current User:", user);
+  }, [user]);
+
   const handleLogout = () => {
+    console.log("Logout button clicked");
     logout();
     navigate("/login");
   };
 
   return (
-    <nav style={navStyle}>
-      <Link to="/" style={logoStyle}>
+    <nav className="sticky top-0 z-50 flex items-center justify-between h-[65px] px-8 bg-[#1a1a2e]/95 backdrop-blur-xl border-b border-[#2d2d4e]">
+      {/* Logo */}
+      <Link
+        to="/"
+        className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent"
+        style={{ fontFamily: "Syne, sans-serif" }}
+      >
         ⚡ AuthApp
       </Link>
 
-      <div style={navLinksStyle}>
+      {/* Right Side Links */}
+      <div className="flex items-center gap-4">
         {user ? (
           <>
-            <span style={{ color: "#94a3b8", fontSize: "0.9rem" }}>
-              👋 <strong style={{ color: "#f1f5f9" }}>{user.name}</strong>
+            <span className="text-sm text-slate-400">
+              👋 <strong className="text-slate-100">{user.name}</strong>
             </span>
+
             <Link
               to="/dashboard"
-              style={{
-                color: "#818cf8",
-                textDecoration: "none",
-                fontSize: "0.9rem",
-                fontWeight: 500,
-                transition: "color 0.2s",
-              }}
+              className="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors duration-200"
             >
               Dashboard
             </Link>
+
             <button
               onClick={handleLogout}
               onMouseEnter={() => setHoverLogout(true)}
               onMouseLeave={() => setHoverLogout(false)}
-              style={{
-                background: hoverLogout ? "#dc2626" : "transparent",
-                border: `1px solid ${hoverLogout ? "#dc2626" : "#2d2d4e"}`,
-                color: hoverLogout ? "white" : "#94a3b8",
-                padding: "0.45rem 1rem",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontSize: "0.875rem",
-                transition: "all 0.2s ease",
-                fontFamily: "DM Sans, sans-serif",
-              }}
+              className={`text-sm font-medium px-4 py-2 rounded-lg transition-all duration-200 border ${
+                hoverLogout
+                  ? "bg-red-600 border-red-600 text-white"
+                  : "border-[#2d2d4e] text-slate-400 hover:border-red-500 hover:text-red-400"
+              }`}
+              style={{ fontFamily: "DM Sans, sans-serif" }}
             >
               Logout
             </button>
@@ -90,27 +61,14 @@ const Navbar = () => {
           <>
             <Link
               to="/login"
-              style={{
-                color: "#94a3b8",
-                textDecoration: "none",
-                fontSize: "0.9rem",
-                fontWeight: 500,
-              }}
+              className="text-sm font-medium text-slate-400 hover:text-slate-200 transition-colors"
             >
               Login
             </Link>
+
             <Link
               to="/register"
-              style={{
-                background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-                color: "white",
-                textDecoration: "none",
-                padding: "0.45rem 1.2rem",
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                transition: "opacity 0.2s",
-              }}
+              className="text-sm font-semibold text-white px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-opacity"
             >
               Sign Up
             </Link>

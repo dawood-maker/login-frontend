@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { forgotPassword, verifyOTP, resetPassword } from "../utils/api";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
-  // Step: 1 = enter email, 2 = enter OTP, 3 = enter new password
+
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -13,74 +13,82 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [focusField, setFocusField] = useState("");
 
-  const inputStyle = (field) => ({
-    width: "100%",
-    padding: "0.85rem 1rem",
-    background: "#0d0d1f",
-    border: `1.5px solid ${focusField === field ? "#4f46e5" : "#2d2d4e"}`,
-    borderRadius: "10px",
-    color: "#f1f5f9",
-    fontSize: "0.95rem",
-    outline: "none",
-    transition: "all 0.25s ease",
-    fontFamily: "DM Sans, sans-serif",
-    boxShadow:
-      focusField === field ? "0 0 0 3px rgba(79, 70, 229, 0.15)" : "none",
-  });
+  useEffect(() => {
+    console.log("Current Step:", step);
+  }, [step]);
 
-  // Step 1: Send OTP
+  // STEP 1
   const handleSendOTP = async (e) => {
     e.preventDefault();
+    console.log("Sending OTP to:", email);
+
     setLoading(true);
     setError("");
     setSuccess("");
+
     try {
       const res = await forgotPassword({ email });
+      console.log("OTP Sent Response:", res.data);
       setSuccess(res.data.message);
       setStep(2);
     } catch (err) {
+      console.log("Send OTP Error:", err.response?.data);
       setError(err.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 2: Verify OTP
+  // STEP 2
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
+    console.log("Verifying OTP:", otp);
+
     setLoading(true);
     setError("");
     setSuccess("");
+
     try {
       const res = await verifyOTP({ email, otp });
+      console.log("OTP Verified:", res.data);
       setSuccess(res.data.message);
       setStep(3);
     } catch (err) {
+      console.log("OTP Verification Error:", err.response?.data);
       setError(err.response?.data?.message || "Invalid OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 3: Reset Password
+  // STEP 3
   const handleResetPassword = async (e) => {
     e.preventDefault();
+
     if (newPassword !== confirmPassword) {
+      console.log("Passwords do not match");
       return setError("Passwords do not match!");
     }
+
     if (newPassword.length < 6) {
+      console.log("Password too short");
       return setError("Password must be at least 6 characters");
     }
+
+    console.log("Resetting password for:", email);
+
     setLoading(true);
     setError("");
     setSuccess("");
+
     try {
       const res = await resetPassword({ email, otp, newPassword });
+      console.log("Password Reset Success:", res.data);
       setSuccess(res.data.message);
       setTimeout(() => navigate("/login"), 2500);
     } catch (err) {
+      console.log("Reset Password Error:", err.response?.data);
       setError(err.response?.data?.message || "Failed to reset password");
     } finally {
       setLoading(false);
@@ -98,416 +106,130 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2rem",
-        background:
-          "radial-gradient(ellipse at 50% 30%, rgba(79,70,229,0.15) 0%, transparent 60%), #0f0f1a",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "440px",
-          background: "rgba(26, 26, 46, 0.9)",
-          backdropFilter: "blur(20px)",
-          borderRadius: "20px",
-          border: "1px solid #2d2d4e",
-          padding: "2.5rem",
-          boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
-          animation: "fadeIn 0.4s ease",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {/* Steps indicator */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "0.5rem",
-            marginBottom: "1.8rem",
-          }}
-        >
+    <div className="min-h-screen flex items-center justify-center px-6 bg-[#0f0f1a] bg-[radial-gradient(ellipse_at_50%_30%,rgba(79,70,229,0.15)_0%,transparent_60%)]">
+      <div className="w-full max-w-md bg-[#1a1a2e]/90 backdrop-blur-xl border border-[#2d2d4e] rounded-2xl p-10 shadow-2xl">
+        {/* Steps Indicator */}
+        <div className="flex justify-center gap-2 mb-8">
           {[1, 2, 3].map((s) => (
             <div
               key={s}
-              style={{
-                width: s === step ? "2.5rem" : "0.75rem",
-                height: "0.4rem",
-                borderRadius: "99px",
-                background:
-                  s <= step
-                    ? "linear-gradient(90deg, #4f46e5, #7c3aed)"
-                    : "#2d2d4e",
-                transition: "all 0.4s ease",
-              }}
+              className={`h-2 rounded-full transition-all duration-500 ${
+                s === step
+                  ? "w-10 bg-gradient-to-r from-indigo-600 to-purple-600"
+                  : s < step
+                    ? "w-6 bg-indigo-500"
+                    : "w-3 bg-[#2d2d4e]"
+              }`}
             />
           ))}
         </div>
 
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div
-            style={{
-              width: "60px",
-              height: "60px",
-              background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-              borderRadius: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 1rem",
-              fontSize: "1.6rem",
-              boxShadow: "0 10px 30px rgba(79,70,229,0.4)",
-            }}
-          >
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 mx-auto mb-4 flex items-center justify-center text-xl rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-lg">
             {stepTitles[step].icon}
           </div>
-          <h1
-            style={{
-              fontFamily: "Syne, sans-serif",
-              fontWeight: 800,
-              fontSize: "1.6rem",
-              background: "linear-gradient(135deg, #f1f5f9, #818cf8)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              marginBottom: "0.4rem",
-            }}
-          >
+
+          <h1 className="text-2xl font-extrabold bg-gradient-to-r from-slate-100 to-indigo-400 bg-clip-text text-transparent">
             {stepTitles[step].title}
           </h1>
-          <p style={{ color: "#64748b", fontSize: "0.875rem" }}>
-            {stepTitles[step].sub}
-          </p>
+
+          <p className="text-slate-500 text-sm mt-1">{stepTitles[step].sub}</p>
         </div>
 
         {/* Messages */}
         {error && (
-          <div
-            style={{
-              background: "rgba(239,68,68,0.1)",
-              border: "1px solid rgba(239,68,68,0.3)",
-              borderRadius: "10px",
-              padding: "0.8rem 1rem",
-              marginBottom: "1.2rem",
-              color: "#fca5a5",
-              fontSize: "0.875rem",
-            }}
-          >
+          <div className="bg-red-500/10 border border-red-500/30 text-red-300 text-sm px-4 py-3 rounded-lg mb-5">
             ⚠️ {error}
           </div>
         )}
+
         {success && (
-          <div
-            style={{
-              background: "rgba(34,197,94,0.1)",
-              border: "1px solid rgba(34,197,94,0.3)",
-              borderRadius: "10px",
-              padding: "0.8rem 1rem",
-              marginBottom: "1.2rem",
-              color: "#86efac",
-              fontSize: "0.875rem",
-            }}
-          >
+          <div className="bg-green-500/10 border border-green-500/30 text-green-300 text-sm px-4 py-3 rounded-lg mb-5">
             ✅ {success}
           </div>
         )}
 
-        {/* STEP 1: Email */}
-        {step === 1 && (
-          <form onSubmit={handleSendOTP}>
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  color: "#94a3b8",
-                  fontSize: "0.85rem",
-                  fontWeight: 500,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                Email Address
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setError("");
-                }}
-                onFocus={() => setFocusField("email")}
-                onBlur={() => setFocusField("")}
-                style={inputStyle("email")}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                padding: "0.9rem",
-                background: loading
-                  ? "#3730a3"
-                  : "linear-gradient(135deg, #4f46e5, #7c3aed)",
-                border: "none",
-                borderRadius: "10px",
-                color: "white",
-                fontSize: "1rem",
-                fontWeight: 700,
-                cursor: loading ? "not-allowed" : "pointer",
-                fontFamily: "Syne, sans-serif",
-                opacity: loading ? 0.8 : 1,
-                boxShadow: loading ? "none" : "0 10px 30px rgba(79,70,229,0.4)",
-              }}
-            >
-              {loading ? (
-                <span
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "18px",
-                      height: "18px",
-                      border: "2px solid rgba(255,255,255,0.3)",
-                      borderTop: "2px solid white",
-                      borderRadius: "50%",
-                      animation: "spin 1s linear infinite",
-                    }}
-                  />
-                  Sending OTP...
-                </span>
-              ) : (
-                "📤 Send OTP"
-              )}
-            </button>
-          </form>
-        )}
-
-        {/* STEP 2: OTP */}
-        {step === 2 && (
-          <form onSubmit={handleVerifyOTP}>
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  color: "#94a3b8",
-                  fontSize: "0.85rem",
-                  fontWeight: 500,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                Enter 6-digit OTP
-              </label>
-              <input
-                type="text"
-                placeholder="000000"
-                value={otp}
-                maxLength={6}
-                onChange={(e) => {
-                  setOtp(e.target.value.replace(/\D/g, ""));
-                  setError("");
-                }}
-                onFocus={() => setFocusField("otp")}
-                onBlur={() => setFocusField("")}
-                style={{
-                  ...inputStyle("otp"),
-                  textAlign: "center",
-                  fontSize: "1.8rem",
-                  letterSpacing: "8px",
-                  fontFamily: "Syne, sans-serif",
-                }}
-                required
-              />
-              <p
-                style={{
-                  color: "#475569",
-                  fontSize: "0.8rem",
-                  marginTop: "0.5rem",
-                  textAlign: "center",
-                }}
-              >
-                OTP valid for 10 minutes only
-              </p>
-            </div>
-            <button
-              type="submit"
-              disabled={loading || otp.length < 6}
-              style={{
-                width: "100%",
-                padding: "0.9rem",
-                background:
-                  loading || otp.length < 6
-                    ? "#3730a3"
-                    : "linear-gradient(135deg, #4f46e5, #7c3aed)",
-                border: "none",
-                borderRadius: "10px",
-                color: "white",
-                fontSize: "1rem",
-                fontWeight: 700,
-                cursor: loading || otp.length < 6 ? "not-allowed" : "pointer",
-                fontFamily: "Syne, sans-serif",
-                opacity: loading || otp.length < 6 ? 0.7 : 1,
-                boxShadow:
-                  loading || otp.length < 6
-                    ? "none"
-                    : "0 10px 30px rgba(79,70,229,0.4)",
-              }}
-            >
-              {loading ? "Verifying..." : "✔️ Verify OTP"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setStep(1);
-                setOtp("");
-                setError("");
-                setSuccess("");
-              }}
-              style={{
-                width: "100%",
-                padding: "0.7rem",
-                background: "transparent",
-                border: "none",
-                color: "#94a3b8",
-                cursor: "pointer",
-                marginTop: "0.8rem",
-                fontSize: "0.875rem",
-              }}
-            >
-              ← Back / Resend OTP
-            </button>
-          </form>
-        )}
-
-        {/* STEP 3: New Password */}
-        {step === 3 && (
-          <form onSubmit={handleResetPassword}>
-            <div style={{ marginBottom: "1.2rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  color: "#94a3b8",
-                  fontSize: "0.85rem",
-                  fontWeight: 500,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                New Password
-              </label>
-              <input
-                type="password"
-                placeholder="Min 6 characters"
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value);
-                  setError("");
-                }}
-                onFocus={() => setFocusField("newpass")}
-                onBlur={() => setFocusField("")}
-                style={inputStyle("newpass")}
-                required
-              />
-            </div>
-            <div style={{ marginBottom: "1.5rem" }}>
-              <label
-                style={{
-                  display: "block",
-                  color: "#94a3b8",
-                  fontSize: "0.85rem",
-                  fontWeight: 500,
-                  marginBottom: "0.5rem",
-                }}
-              >
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                placeholder="Repeat password"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  setError("");
-                }}
-                onFocus={() => setFocusField("confirm")}
-                onBlur={() => setFocusField("")}
-                style={{
-                  ...inputStyle("confirm"),
-                  borderColor:
-                    confirmPassword && confirmPassword !== newPassword
-                      ? "#ef4444"
-                      : focusField === "confirm"
-                        ? "#4f46e5"
-                        : "#2d2d4e",
-                }}
-                required
-              />
-              {confirmPassword && confirmPassword !== newPassword && (
-                <p
-                  style={{
-                    color: "#ef4444",
-                    fontSize: "0.78rem",
-                    marginTop: "0.4rem",
-                  }}
-                >
-                  ⚠️ Passwords don't match
-                </p>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                padding: "0.9rem",
-                background: loading
-                  ? "#3730a3"
-                  : "linear-gradient(135deg, #22c55e, #16a34a)",
-                border: "none",
-                borderRadius: "10px",
-                color: "white",
-                fontSize: "1rem",
-                fontWeight: 700,
-                cursor: loading ? "not-allowed" : "pointer",
-                fontFamily: "Syne, sans-serif",
-                opacity: loading ? 0.8 : 1,
-                boxShadow: loading
-                  ? "none"
-                  : "0 10px 30px rgba(34,197,94,0.35)",
-              }}
-            >
-              {loading ? "Resetting..." : "🔐 Reset Password"}
-            </button>
-          </form>
-        )}
-
-        <p
-          style={{
-            textAlign: "center",
-            marginTop: "1.5rem",
-            color: "#64748b",
-            fontSize: "0.875rem",
-          }}
+        {/* STEP CONTENT */}
+        <form
+          onSubmit={
+            step === 1
+              ? handleSendOTP
+              : step === 2
+                ? handleVerifyOTP
+                : handleResetPassword
+          }
+          className="space-y-5"
         >
+          {step === 1 && (
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-lg bg-[#0d0d1f] border border-[#2d2d4e] focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/30 outline-none text-slate-100"
+            />
+          )}
+
+          {step === 2 && (
+            <input
+              type="text"
+              maxLength={6}
+              placeholder="000000"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              required
+              className="w-full text-center text-2xl tracking-[8px] px-4 py-3 rounded-lg bg-[#0d0d1f] border border-[#2d2d4e] focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/30 outline-none text-slate-100"
+            />
+          )}
+
+          {step === 3 && (
+            <>
+              <input
+                type="password"
+                placeholder="New password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-lg bg-[#0d0d1f] border border-[#2d2d4e] focus:border-green-600 focus:ring-2 focus:ring-green-600/30 outline-none text-slate-100"
+              />
+
+              <input
+                type="password"
+                placeholder="Confirm password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className={`w-full px-4 py-3 rounded-lg bg-[#0d0d1f] border outline-none text-slate-100 ${
+                  confirmPassword && confirmPassword !== newPassword
+                    ? "border-red-500"
+                    : "border-[#2d2d4e] focus:border-green-600 focus:ring-2 focus:ring-green-600/30"
+                }`}
+              />
+            </>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-lg font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition disabled:opacity-70"
+          >
+            {loading
+              ? "Processing..."
+              : step === 1
+                ? "📤 Send OTP"
+                : step === 2
+                  ? "✔️ Verify OTP"
+                  : "🔐 Reset Password"}
+          </button>
+        </form>
+
+        <p className="text-center text-slate-500 text-sm mt-6">
           Remember password?{" "}
           <Link
             to="/login"
-            style={{
-              color: "#818cf8",
-              textDecoration: "none",
-              fontWeight: 600,
-            }}
+            className="text-indigo-400 font-semibold hover:text-indigo-300"
           >
             Sign in →
           </Link>

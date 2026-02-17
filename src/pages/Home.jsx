@@ -1,136 +1,51 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
   const { user } = useAuth();
 
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2rem",
-        textAlign: "center",
-        background:
-          "radial-gradient(ellipse at 50% 0%, rgba(79,70,229,0.2) 0%, transparent 60%), #0f0f1a",
-      }}
-    >
-      {/* Floating decorations */}
-      <div
-        style={{
-          position: "fixed",
-          top: "15%",
-          left: "10%",
-          width: "400px",
-          height: "400px",
-          background:
-            "radial-gradient(circle, rgba(79,70,229,0.1) 0%, transparent 70%)",
-          borderRadius: "50%",
-          pointerEvents: "none",
-          animation: "float 8s ease-in-out infinite",
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          bottom: "10%",
-          right: "5%",
-          width: "300px",
-          height: "300px",
-          background:
-            "radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%)",
-          borderRadius: "50%",
-          pointerEvents: "none",
-          animation: "float 6s ease-in-out infinite reverse",
-        }}
-      />
+  useEffect(() => {
+    console.log("Home Page Loaded");
+    console.log("Current User:", user);
+  }, [user]);
 
-      <div
-        style={{
-          animation: "fadeIn 0.7s ease",
-          position: "relative",
-          zIndex: 1,
-          maxWidth: "650px",
-        }}
-      >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            background: "rgba(79,70,229,0.15)",
-            border: "1px solid rgba(79,70,229,0.3)",
-            borderRadius: "99px",
-            padding: "0.4rem 1rem",
-            marginBottom: "2rem",
-            color: "#818cf8",
-            fontSize: "0.85rem",
-            fontWeight: 600,
-          }}
-        >
+  return (
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center bg-[#0f0f1a] bg-[radial-gradient(ellipse_at_50%_0%,rgba(79,70,229,0.2)_0%,transparent_60%)] overflow-hidden">
+      {/* Floating Decorations */}
+      <div className="fixed top-[15%] left-[10%] w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(79,70,229,0.1)_0%,transparent_70%)] rounded-full animate-pulse pointer-events-none" />
+
+      <div className="fixed bottom-[10%] right-[5%] w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(124,58,237,0.1)_0%,transparent_70%)] rounded-full animate-pulse pointer-events-none" />
+
+      <div className="relative z-10 max-w-2xl animate-fadeIn">
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 bg-indigo-600/15 border border-indigo-600/30 text-indigo-400 text-sm font-semibold px-4 py-2 rounded-full mb-8">
           ⚡ Full Stack Auth System
         </div>
 
-        <h1
-          style={{
-            fontFamily: "Syne, sans-serif",
-            fontWeight: 800,
-            fontSize: "clamp(2.5rem, 6vw, 4rem)",
-            lineHeight: 1.1,
-            marginBottom: "1.5rem",
-            background: "linear-gradient(135deg, #f1f5f9 30%, #818cf8 70%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
+        {/* Heading */}
+        <h1 className="text-[clamp(2.5rem,6vw,4rem)] font-extrabold leading-tight mb-6 bg-gradient-to-br from-slate-100 to-indigo-400 bg-clip-text text-transparent">
           Secure Auth
           <br />
           Made Simple
         </h1>
 
-        <p
-          style={{
-            color: "#94a3b8",
-            fontSize: "1.1rem",
-            lineHeight: 1.7,
-            marginBottom: "2.5rem",
-          }}
-        >
+        {/* Description */}
+        <p className="text-slate-400 text-lg leading-relaxed mb-10">
           Complete authentication system with{" "}
-          <strong style={{ color: "#c4b5fd" }}>Login</strong>,{" "}
-          <strong style={{ color: "#c4b5fd" }}>Register</strong>,{" "}
-          <strong style={{ color: "#c4b5fd" }}>Logout</strong> and{" "}
-          <strong style={{ color: "#c4b5fd" }}>OTP Password Reset</strong> via
+          <strong className="text-purple-300">Login</strong>,{" "}
+          <strong className="text-purple-300">Register</strong>,{" "}
+          <strong className="text-purple-300">Logout</strong> and{" "}
+          <strong className="text-purple-300">OTP Password Reset</strong> via
           email.
         </p>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            justifyContent: "center",
-            flexWrap: "wrap",
-          }}
-        >
+        {/* Buttons */}
+        <div className="flex flex-wrap justify-center gap-4">
           {user ? (
             <Link
               to="/dashboard"
-              style={{
-                background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-                color: "white",
-                padding: "0.9rem 2rem",
-                borderRadius: "12px",
-                textDecoration: "none",
-                fontWeight: 700,
-                fontSize: "1rem",
-                fontFamily: "Syne, sans-serif",
-                boxShadow: "0 10px 30px rgba(79,70,229,0.4)",
-                transition: "all 0.25s ease",
-              }}
+              className="px-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-600/40 hover:-translate-y-1 transition-all duration-300"
             >
               → Go to Dashboard
             </Link>
@@ -138,32 +53,14 @@ const Home = () => {
             <>
               <Link
                 to="/register"
-                style={{
-                  background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
-                  color: "white",
-                  padding: "0.9rem 2rem",
-                  borderRadius: "12px",
-                  textDecoration: "none",
-                  fontWeight: 700,
-                  fontSize: "1rem",
-                  fontFamily: "Syne, sans-serif",
-                  boxShadow: "0 10px 30px rgba(79,70,229,0.4)",
-                }}
+                className="px-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-600/40 hover:-translate-y-1 transition-all duration-300"
               >
                 🚀 Get Started Free
               </Link>
+
               <Link
                 to="/login"
-                style={{
-                  background: "transparent",
-                  border: "1.5px solid #2d2d4e",
-                  color: "#94a3b8",
-                  padding: "0.9rem 2rem",
-                  borderRadius: "12px",
-                  textDecoration: "none",
-                  fontWeight: 600,
-                  fontSize: "1rem",
-                }}
+                className="px-8 py-4 rounded-xl border border-[#2d2d4e] text-slate-400 font-semibold hover:border-indigo-600 hover:text-indigo-400 transition-all duration-300"
               >
                 Sign In →
               </Link>
@@ -171,16 +68,8 @@ const Home = () => {
           )}
         </div>
 
-        {/* Feature badges */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0.8rem",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            marginTop: "3rem",
-          }}
-        >
+        {/* Feature Badges */}
+        <div className="flex flex-wrap justify-center gap-3 mt-12">
           {[
             "🍃 MongoDB",
             "⚡ Express.js",
@@ -191,14 +80,7 @@ const Home = () => {
           ].map((f) => (
             <span
               key={f}
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid #2d2d4e",
-                borderRadius: "99px",
-                padding: "0.35rem 0.9rem",
-                fontSize: "0.8rem",
-                color: "#64748b",
-              }}
+              className="px-4 py-2 text-xs rounded-full bg-white/5 border border-[#2d2d4e] text-slate-500"
             >
               {f}
             </span>

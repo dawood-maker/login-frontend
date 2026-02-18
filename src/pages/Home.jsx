@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+
 const features = [
   {
     icon: "🔐",
@@ -33,7 +34,6 @@ const stack = [
   { label: "JWT", color: "from-yellow-600 to-yellow-400", icon: "🔑" },
   { label: "Nodemailer", color: "from-rose-600 to-rose-400", icon: "📨" },
 ];
-
 const Home = () => {
   const { user } = useAuth();
   const [visible, setVisible] = useState(false);
